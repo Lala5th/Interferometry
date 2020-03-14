@@ -67,41 +67,52 @@ max = int(args[9])
 s = int(args[8])*(max+1)
 print("Started secondary background removal")
 for f in range(1,max+1):
-    avg = 0
+    avg = []
     s -= int(args[8])
     printProgressBar(f,max,suffix = 'Pass #'+str(f))
     for i in range(sort.size):
     	if i < s:
-    		avg += sort['s1'][i]
+    		avg.append(sort['s1'][i])
     		continue
     	elif i == s:
-    		avg +=sort['s1'][i]
-    		avg = avg/(s+1)
-    		sort['s1'][0:s] -= avg
-    		continue
-    	avg = (avg*s + sort['s1'][i])/(s+1)
-    	sort['s1'][i] -= avg
+            avg.append(sort['s1'][i])
+            sort['s1'][0:int((s-1)/2)] -= sp.mean(avg)
+            continue
+    	elif i == sort.size-1:
+        	avg.append(sort['s1'][i])
+        	avg = avg[1:]
+        	sort['s1'][-int((s-1)/2):] -= sp.mean(avg)
+        	continue
+    	avg.append(sort['s1'][i])
+    	avg = avg[1:]
+    	sort['s1'][i-int((s-1)/2)] -=sp.mean(avg)
 print("Started normalisation")
 avg = 0 # Normalisation
 s = int(args[8])*(max+1)
 for f in range(1,max+1):
-    avg = 0
+    avg = []
     s -= int(args[8])
     printProgressBar(f,max,suffix = 'Pass #'+str(f))
     for i in range(sort.size):
     		if i < s:
-        		avg += abs(sort['s1'][i])
+        		avg.append(abs(sort['s1'][i]))
         		continue
     		elif i == s:
-        		avg +=abs(sort['s1'][i])
-        		avg = avg/(s+1)
-        		sort['s1'][0:s] *= 2/(sp.pi*avg)
+        		avg.append(abs(sort['s1'][i]))
+        		sort['s1'][0:int((s-1)/2)] *= 2/(sp.pi*sp.mean(avg))
         		continue
-    		avg = (avg*s + abs(sort['s1'][i]))/(s+1)
-    		sort['s1'][i] *= 2/(sp.pi*avg)
+    		elif i == sort.size-1:
+        		avg.append(abs(sort['s1'][i]))
+        		avg = avg[1:]
+        		sort['s1'][-int((s-1)/2):] *= 2/(sp.pi*sp.mean(avg))
+        		continue
+    		avg.append(abs(sort['s1'][i]))
+    		avg = avg[1:]
+    		sort['s1'][i-int((s-1)/2)] *= 2/(sp.pi*sp.mean(avg))
 
 
 tbd = []
+sort = sort[2000::]
 sort['s1']*=1
 for i in range(sort.size):
     if abs(sort['s1'][i]) > 1.0:
@@ -114,7 +125,6 @@ for d in tbd:
     sort = sp.delete(sort,d)
     tbd -= 1
 
-sort = sort[2000::]
 n_axis = sort['x']-sort['x'][0]
 null_p -= sort['x'][0]
 phase_0 = sp.arcsin(sort['s1'][0])
@@ -151,7 +161,7 @@ for i in sp.array(range(int(sort.size/samp)))*samp:
             d = 0
             skip = False
             backscatt = False
-        if abs(ref[int((d + x - corr)*sep)] - sort['s1'][i]) < prec and d < wl/4:
+        if abs(ref[int((d + x - corr)*sep)] - sort['s1'][i]) < prec and d < wl/2:
             n_axis[i:]+=d
             if null_p <= x:
                 null_p += d
@@ -291,8 +301,8 @@ def get_sens(x):
 
 for i in range(xx.size):
     printProgressBar(i,xx.size-1)
-    yy[i] /= get_sens(1/xx[i])
-    yy2[i] /= get_sens(1/xx[i])
+    yy[i] *= xx[i]**2/get_sens(1/xx[i])
+    yy2[i] *= xx[i]**2/get_sens(1/xx[i])
 #'''
 plt.ion()
 plt.figure('FFT')
