@@ -7,6 +7,8 @@ import sys
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({'font.size':12})
+
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
@@ -301,8 +303,8 @@ def get_sens(x):
 
 for i in range(xx.size):
     printProgressBar(i,xx.size-1)
-    yy[i] *= xx[i]**2/get_sens(1/xx[i])
-    yy2[i] *= xx[i]**2/get_sens(1/xx[i])
+    yy[i] *= (xx[i]**2)/get_sens(1/xx[i])
+    yy2[i] *= (xx[i]**2)/get_sens(1/xx[i])
 #'''
 plt.ion()
 plt.figure('FFT')
@@ -312,6 +314,7 @@ plt.plot(xf/100,sp.absolute(yf2))
 plt.grid(True)
 plt.figure('LAMBDA')
 plt.xlabel('$\lambda$ [$nm$]')
+plt.ylabel('Intensity [a.u.]')
 plt.plot(1/xx,sp.absolute(yy))
 plt.plot(1/xx,sp.absolute(yy2))
 plt.xlim([400,1050])
