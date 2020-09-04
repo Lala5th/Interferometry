@@ -110,7 +110,7 @@ do
        Output=$OPTARG
        ;;
     f)
-       Frequency=$OARGPT
+       Frequency=$OPTARG
        ;;
     m)
        move=$OPTARG
